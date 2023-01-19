@@ -1,0 +1,51 @@
+version: '3.3'
+services:
+  mi-base-datos:
+    build: servicesData/postgresdb/
+    environment:
+      - POSTGRES_PASSWORD=secret
+    ports:
+      - 5432:5432
+    volumes:
+      - ./blockstorage/postgres:/var/lib/postgresql/data
+  discovery-server:
+    image: abarriga/eureka-discovery:0.0.1-snapshot
+    ports:
+      - 8761:8761
+  clientes-microservicio:
+    image: abarriga/facedog-mso:0.0.1-snapshot
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://mi-base-datos:5432/facedog
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mi-base-datos
+  login-microservicio:
+   image: abarriga/facedog-msoo:0.0.1-snapshot
+   environment:
+     - SPRING_DATASOURCE_URL=jdbc:postgresql://mi-base-datos:5432/facedog
+     - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+   ports:
+     - "8082:8082"
+   depends_on:
+     - mi-base-datos
+  # post-microservicio:
+  #  image: abarriga/facedog-post-mso:0.0.1-snapshot
+  #  environment:
+  #    - SPRING_DATASOURCE_URL=jdbc:postgresql://mi-base-datos:5432/facedog
+  #    - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+  #  ports:
+  #    - "8083:8083"
+  #  depends_on:
+  #    - mi-base-datos
+  # date-microservicio:
+  #  image: abarriga/facedog-date-mso:0.0.1-snapshot
+  #  environment:
+  #    - SPRING_DATASOURCE_URL=jdbc:postgresql://mi-base-datos:5432/facedog
+  #    - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+  #  ports:
+  #    - "8085:8085"
+  #  depends_on:
+  #    - mi-base-datos
+  
